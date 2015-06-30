@@ -19,8 +19,13 @@ do
 
   for range in $ranges; do
     # echo $range
-    repeatnum=$(echo $contig | cut -c $range | grep -f $tempfile | wc -l)
-    echo -e "line ${i}\t${range}\t${repeatnum}" >> $results # print results
+
+    # depending on computer, following line may not work
+    # repeatnum=$(echo $contig | cut -c $range | grep -f - $tempfile | wc -l)
+    repeatnum=$(echo $contig | cut -c $range | grep -f /dev/stdin $tempfile | wc -l)
+    if [ $repeatnum -gt 0 ]; then
+      echo -e "line ${i}\t${range}\t${repeatnum}" >> $results # print results
+    fi
   done
   echo $contig >> $tempfile # add to comparisons
   let i+=2 # every other line
