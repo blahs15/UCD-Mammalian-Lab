@@ -38,6 +38,7 @@ do
     repeatnum=$( echo $cutStr | grep -f /dev/stdin $tempfile | wc -l)
     if [ $repeatnum -gt 0 ]; then
       echo -e "line ${i}\t${range}\t${repeatnum}" >> $results # print results
+      echo $cutStr >> $results
     fi
   done
   echo $contig >> $tempfile # add to comparisons
@@ -49,25 +50,25 @@ rm -f $tempfile
 
 
 # add in the actual cut repeated sequences
-tempResults=tempmyrepeats396
-> $tempResults
-resultlen=($(wc -l $results))
-i=1
-while [ $i -le $resultlen ]; do
-  repeatline=$(awk -F'\t' -v line="$i" 'NR==line {print $0}' $results)
-  echo $repeatline >> $tempResults
-  linenum=$(echo $repeatline | awk -F' ' '{print $2}')
-  # echo $linenum
-  cutsection=$(echo $repeatline | awk -F' ' '{print $3}')
-  # echo $cutsection
-  contig=$(awk -F'\t' -v line="$linenum" 'NR==line {print $0}' $fafile | cut -c $cutsection)
-  # echo $contig
-  echo $contig >> $tempResults
-  let i+=1
-done
+# tempResults=tempmyrepeats396
+# > $tempResults
+# resultlen=($(wc -l $results))
+# i=1
+# while [ $i -le $resultlen ]; do
+#   repeatline=$(awk -F'\t' -v line="$i" 'NR==line {print $0}' $results)
+#   echo $repeatline >> $tempResults
+#   linenum=$(echo $repeatline | awk -F' ' '{print $2}')
+#   # echo $linenum
+#   cutsection=$(echo $repeatline | awk -F' ' '{print $3}')
+#   # echo $cutsection
+#   contig=$(awk -F'\t' -v line="$linenum" 'NR==line {print $0}' $fafile | cut -c $cutsection)
+#   # echo $contig
+#   echo $contig >> $tempResults
+#   let i+=1
+# done
 
-cp $tempResults $results
-rm -f $tempResults
+# cp $tempResults $results
+# rm -f $tempResults
 
 date +"%m/%d/%Y %H:%M:%S ${0##*/} finished"
 
