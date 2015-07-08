@@ -9,11 +9,11 @@ ranges="1-50 100-150 200-250"
 
 date +"%m/%d/%Y %H:%M:%S ${0##*/} started"
 
-contigs=($(wc -l $fafile))
-
 tempfile=tempFaFile396 # a unique temporary file name
 > $tempfile
 > $results
+
+contigs=($(wc -l $fafile))
 
 i=2
 while [ $i -le $contigs ]
