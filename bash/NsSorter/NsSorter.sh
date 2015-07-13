@@ -18,10 +18,13 @@ seqNum=4
 
 i=1
 while [ $i -le $seqNum ]; do
+  echo "line $i:"
+  echo $maskedfafile
+
   # seq=$(awk -F'\t' -v line="$i" 'NR==line {print $0}' $maskedfafile)
-  # seq=$(sed -n $maskedfafile) #?
+  seq=$(sed ${i}p < $maskedfafile) # ?
   
-  # echo $seq
+  echo $seq
 
   let i+=2
 done
