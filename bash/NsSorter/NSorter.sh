@@ -8,7 +8,7 @@ noNseqfile=savedSeqs.fa
 
 # percentage of Ns allowed -- from 0~100%
 Npercentage=60
-Npercentage="0.6"
+# Npercentage="0.6" # for bc calculation, don't use
 
 ####################################################
 

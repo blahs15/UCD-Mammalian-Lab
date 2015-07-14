@@ -9,10 +9,12 @@ noNseqfile=savedSeqs.fa
 # no Ns allowed in this script
 # percentage of Ns allowed -- from 0~100%
 # Npercentage=60
+# Npercentage="0.6" # for bc calculation, don't use
 
 ####################################################
 
-date +"%m/%d %H:%M:%S NsSorter started"
+scriptname=$0
+date +"%m/%d %H:%M:%S $scriptname started"
 
 > $Nseqfile
 > $noNseqfile
@@ -54,21 +56,19 @@ while [ $i -le $seqNum ]; do
   # method 1.1: take out Ns, count --- Time same as 1.2
   # noNseq=$(tr -d 'N' <<<$seq )
   # noNNum=${#noNseq} # length without Ns
-  # method 1.2: take out everything but Ns, count --- Time same as 1.1
+  # method 1.2: keep Ns only, count --- Time same as 1.1
   Ns=$(tr -cd 'N' <<<$seq )
   NNum=${#Ns} # length with only Ns
+  # method 1.3: keep Ns only | wc -c --- Time ~same as 1.2
+  # NNum=$(tr -cd 'N' <<<$seq | wc -c)
 
-  # method 2: count using grep -c
+  # method 2: count using grep -c --- Time slightly worse than 1.2
+  # NNum=$(echo $seq | grep -o "N" | wc -l)
 
   #################################################
-  # step 3: test proportion vs. allowed %, append to appropriate result file
-
-  # method 1: numerator * 100
-  # portion*100/total > % allowed --> tooManyNs
+  # step 3: append to appropriate result file
+  # if there are any Ns
   if [ $NNum -gt 0 ]; then
-
-  # method 2: floating point arithmetic
-
     echo $id >> $Nseqfile
     echo $seq >> $Nseqfile
   else
@@ -77,5 +77,5 @@ while [ $i -le $seqNum ]; do
   fi
 done
 
-date +"%m/%d %H:%M:%S NsSorter finished"
+date +"%m/%d %H:%M:%S $scriptname finished"
 
