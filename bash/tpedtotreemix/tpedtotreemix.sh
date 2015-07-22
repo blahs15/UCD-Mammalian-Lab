@@ -123,7 +123,7 @@ for pops in $popsizes; do
   sed -i '' 's/, /,/g' $poptempfile
 
   # remove current pop from tempfile
-  cut -f${pops}- $tempfile1 > $tempfile2
+  cut -f$((${pops}+1))- $tempfile1 > $tempfile2
   rm -f $tempfile1
   mv $tempfile2 $tempfile1
   let popNum+=1
