@@ -3,6 +3,17 @@
 # This script converts a .tped file to a .treemix file.
 # NOT included: the prepending of the population names to the .treemix file
 
+#####################################################
+# Possible Problems that may occur:
+
+# 1: sed
+# sed: can't read s/, /,/g: No such file or directory
+# caused due to differences in sed versions
+# try replacing the sed line with:
+# sed -i 's/, /,/g' $poptempfile
+
+#####################################################
+
 # Example format of .tped file:
 # Sequence3378 Sequence3378_333 0 333	T T	C C	T T	T T	T T	T T	T T	T T	T T	T T	T T	T C	T T	T T	T C	T T	T T	T T	T T	T C	T C	T C	T T	T T	T T	T T	T T	T C	T T	T C	T T	T T	T T	T T	T C	T T	T T	T C	T T
 # Sequence6726 Sequence6726_366 0 366	G C	G G	G C	G C	G G	G G	C C	G C	G C	G C	G G	G G	G C	G G	G G	G C	G G	G C	C C	G G	G C	C C	G C	G C	G G	C C	G G	G G	G C	G C	G C	G C	C C	G G	G C	C C	C C	G G	G C
