@@ -1,10 +1,29 @@
 #!/bin/bash
 
+# This script converts a .tped file to a .treemix file.
+# NOT included: the prepending of the population names to the .treemix file
+
+# Example format of .tped file:
+# Sequence3378 Sequence3378_333 0 333	T T	C C	T T	T T	T T	T T	T T	T T	T T	T T	T T	T C	T T	T T	T C	T T	T T	T T	T T	T C	T C	T C	T T	T T	T T	T T	T T	T C	T T	T C	T T	T T	T T	T T	T C	T T	T T	T C	T T
+# Sequence6726 Sequence6726_366 0 366	G C	G G	G C	G C	G G	G G	C C	G C	G C	G C	G G	G G	G C	G G	G G	G C	G G	G C	C C	G G	G C	C C	G C	G C	G G	C C	G G	G G	G C	G C	G C	G C	C C	G G	G C	C C	C C	G G	G C
+# Example format of .treemix file:
+# pop1 pop2 pop3
+# 16,2 18,2 34,6
+# 11,7 15,5 19,21
+
+#####################################################
+#####################################################
+
+# input / output file names/data
 tpedfile=file.tped
 treemixfile=file.treemix
 # number of individuals in each population
 popsizes="9 10 20"
 
+#####################################################
+#####################################################
+
+# temp file names
 basepairfile=temp__basepair360.txt
 tempfile1=temp__file361.txt
 tempfile2=temp__file362.txt
@@ -18,21 +37,24 @@ date +"%m/%d %H:%M:%S $scriptname started"
 cut -f2- $tpedfile > $tempfile1
 
 #####################################################
-
 # method 1: do 1 population at a time, paste together
+#####################################################
 
 # step 1.1: get the two base pairs for each line
 
 > $basepairfile
+# basepairfile contains the two base pairs for each corresponding line
 lines=$(wc -l < $tempfile1)
 i=1
 while [ $i -le $lines ]; do
+  # get line
   line=$(sed -n ${i}p $tempfile1)
+  # get base pair counts
   Acount=$(grep -o 'A' <<<$line | wc -l)
   Tcount=$(grep -o 'T' <<<$line | wc -l)
   Gcount=$(grep -o 'G' <<<$line | wc -l)
   Ccount=$(grep -o 'C' <<<$line | wc -l)
-  # print two positive counts to $basepairfile
+  # print the two positive counts to $basepairfile
   basepairs=""
   if [ $Acount -gt 0 ]; then basepairs="${basepairs} A"; fi
   if [ $Tcount -gt 0 ]; then basepairs="${basepairs} T"; fi
@@ -42,22 +64,27 @@ while [ $i -le $lines ]; do
   let i+=1
 done
 
+#####################################################
+
 # step 1.2: get the counts of the base pairs into files for each pop
 
-popNum=1 # count for temp files
+popNum=101 # count for temp files
 for pops in $popsizes; do
   poptempfile=${poptempfiles}${popNum}
   > $poptempfile
+  # get base pairs of current population
   cut -f1-$pops $tempfile1 > $tempfile2
-  lines=$(wc -l < $tempfile2)
+  # lines=$(wc -l < $tempfile2)
   i=1
   while [ $i -le $lines ]; do
+    # get line
     line=$(sed -n ${i}p $tempfile2)
+    # get base pairs for line
     bases=$(sed -n ${i}p $basepairfile)
     base1=$(echo $bases | cut -d' ' -f1)
     base2=$(echo $bases | cut -d' ' -f2)
 
-    # base 1
+    # base 1 - get count
     if [ $base1 == "A" ]; then 
       counts=$(grep -o 'A' <<<$line | wc -l)
     elif [ $base1 == "T" ]; then 
@@ -66,7 +93,7 @@ for pops in $popsizes; do
       counts=$(grep -o 'G' <<<$line | wc -l)
     fi
 
-    # base 2
+    # base 2 - get count
     if [ $base2 == "T" ]; then
       counts2=$(grep -o 'T' <<<$line | wc -l)
     elif [ $base2 == "G" ]; then
@@ -75,6 +102,7 @@ for pops in $popsizes; do
       counts2=$(grep -o 'C' <<<$line | wc -l)
     fi
     
+    # format/append counts
     counts=${counts},${counts2}
     echo $counts >> $poptempfile
 
@@ -83,17 +111,31 @@ for pops in $popsizes; do
   # remove spaces in poptempfile
   sed -i '' 's/, /,/g' $poptempfile
 
-  # remove pop from tempfile
+  # remove current pop from tempfile
   cut -f${pops}- $tempfile1 > $tempfile2
   rm -f $tempfile1
   mv $tempfile2 $tempfile1
   let popNum+=1
 done
 
+#####################################################
+
 # step 1.3: paste pop files together
 # space delimited
 
-# rm -f $tempfile1 $tempfile2 $basepairfile
+# use globbing? - breaks if more than 10 pops??
+# fixed by starting count at 101
+paste -d ' ' ${poptempfiles}* > $treemixfile
+
+# use loop?
+
+#####################################################
+
+# step 1.4: cleanup
+
+# if worried there may be more than 2 different base pairs in any line, comment the following line to keep the file.
+rm -f $basepairfile
+rm -f $tempfile1 $tempfile2 ${poptempfiles}*
 
 #####################################################
 
