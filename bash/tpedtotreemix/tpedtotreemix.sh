@@ -7,7 +7,11 @@
 # NOTES:
 
 # seqences with only 1 type of base pair are skipped
+# sequences with 3+ types of base pairs won't work properly
 # program will only detect characters ATCG
+
+# For Haploid genomes:
+# 
 
 #####################################################
 # Possible Problems that may occur:
@@ -77,7 +81,18 @@ while [ $i -le $lines ]; do
   if [ $Tcount -gt 0 ]; then basepairs="${basepairs} T"; fi
   if [ $Gcount -gt 0 ]; then basepairs="${basepairs} G"; fi
   if [ $Ccount -gt 0 ]; then basepairs="${basepairs} C"; fi
-  echo $basepairs >> $basepairfile
+  
+  base1=base2=""
+  base1=$(echo $basepairs | cut -d' ' -f2)
+  base2=$(echo $basepairs | cut -d' ' -f3)
+
+  # if only 1 base pair
+    echo "line= $i b1= $base1 b2= $base2"
+  if [ ! -z $base2 ]; then # checks if empty
+    echo $basepairs >> $basepairfile
+  else
+    echo skipping line $i
+  fi
   let i+=1
 done
 
@@ -92,28 +107,26 @@ for pops in $popsizes; do
   > $poptempfile
   # get base pairs of current population
   cut -f1-$pops $tempfile1 > $tempfile2
-  # lines=$(wc -l < $tempfile2)
+  lines=$(wc -l < $basepairfile)
   i=1
   while [ $i -le $lines ]; do
     # get base pairs for line
     bases=$(sed -n ${i}p $basepairfile)
-    base1=base2=""
+    # base1=base2=""
+    tpedLineNum=$(echo $bases | cut -d' ' -f1)
     base1=$(echo $bases | cut -d' ' -f2)
     base2=$(echo $bases | cut -d' ' -f3)
 
-    # if only 1 base pair
-    # echo "line= $i b1= $base1 b2= $base2"
-    if [ -z $base2 ]; then # checks if empty
-      # echo "skipping pop $popNum line $i"
-      let i+=1
-      continue
-    fi
+    # # if only 1 base pair
+    echo "line= $i b1= $base1 b2= $base2"
+    # if [ -z $base2 ]; then # checks if empty
+    #   # echo "skipping pop $popNum line $i"
+    #   let i+=1
+    #   continue
+    # fi
 
     # get line
-    line=$(sed -n ${i}p $tempfile2)
-
-    counts=0
-    counts2=0
+    line=$(sed -n ${tpedLineNum}p $tempfile2)
 
     # base 1 - get count
     if [ $base1 == "A" ]; then 
