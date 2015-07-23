@@ -87,6 +87,7 @@ done
 
 popNum=101 # count for temp files
 for pops in $popsizes; do
+  # echo "starting pop $popNum"
   poptempfile=${poptempfiles}${popNum}
   > $poptempfile
   # get base pairs of current population
@@ -103,7 +104,7 @@ for pops in $popsizes; do
     # if only 1 base pair
     # echo "line= $i b1= $base1 b2= $base2"
     if [ -z $base2 ]; then # checks if empty
-      # echo "skipping line $i"
+      # echo "skipping pop $popNum line $i"
       let i+=1
       continue
     fi
