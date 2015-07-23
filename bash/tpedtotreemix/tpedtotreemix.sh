@@ -11,7 +11,7 @@
 # program will only detect characters ATCG
 
 # For Haploid genomes:
-# 
+# step 1.1.2 will skip lines that contain a heterozygote for any individual in that line
 
 #####################################################
 # Possible Problems that may occur:
@@ -36,10 +36,10 @@
 #####################################################
 
 # input / output file names/data
-tpedfile=file.tped
+tpedfile=Y.tped
 treemixfile=file.treemix
 # number of individuals in each population
-popsizes="9 10 20"
+popsizes="10 6 20"
 
 #####################################################
 #####################################################
@@ -87,11 +87,22 @@ while [ $i -le $lines ]; do
   base2=$(echo $basepairs | cut -d' ' -f3)
 
   # if only 1 base pair
-    echo "line= $i b1= $base1 b2= $base2"
-  if [ ! -z $base2 ]; then # checks if empty
+  # echo "line= $i, b1= $base1, b2= $base2"
+  if [ ! -z $base2 ]; then # checks if not empty
+
+    #####################################################
+    # step 1.1.2: for haploids
+    # remove lines that contain heterozygote pairs within an individual
+
+    while [ ! -z $line ]; do
+      # check first two chars at a time
+      # shift to next pair
+    done
+    #####################################################
+
     echo $basepairs >> $basepairfile
-  else
-    echo skipping line $i
+  # else
+    # echo skipping line $i
   fi
   let i+=1
 done
@@ -117,16 +128,11 @@ for pops in $popsizes; do
     base1=$(echo $bases | cut -d' ' -f2)
     base2=$(echo $bases | cut -d' ' -f3)
 
-    # # if only 1 base pair
-    echo "line= $i b1= $base1 b2= $base2"
-    # if [ -z $base2 ]; then # checks if empty
-    #   # echo "skipping pop $popNum line $i"
-    #   let i+=1
-    #   continue
-    # fi
+    echo "line= $tpedLineNum, basepair= $i, b1= $base1, b2= $base2"
 
     # get line
     line=$(sed -n ${tpedLineNum}p $tempfile2)
+    counts=counts2=0
 
     # base 1 - get count
     if [ $base1 == "A" ]; then 
@@ -167,18 +173,15 @@ done
 # step 1.3: paste pop files together
 # space delimited
 
-# use globbing? - breaks if more than 10 pops??
-# fixed by starting count at 101
+# globbing will only work with <900 populations
 paste -d ' ' ${poptempfiles}* > $treemixfile
-
-# use loop?
 
 #####################################################
 
 # step 1.4: cleanup
 
 # if worried there may be more than 2 different base pairs in any line, comment the following line to keep the file.
-rm -f $basepairfile
+# rm -f $basepairfile
 rm -f $tempfile1 $tempfile2 ${poptempfiles}*
 
 #####################################################
