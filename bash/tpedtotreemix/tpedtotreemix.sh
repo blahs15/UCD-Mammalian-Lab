@@ -4,6 +4,12 @@
 # NOT included: the prepending of the population names to the .treemix file
 
 #####################################################
+# NOTES:
+
+# seqences with only 1 type of base pair are skipped
+# program will only detect characters ATCG
+
+#####################################################
 # Possible Problems that may occur:
 
 # 1: sed
@@ -66,7 +72,7 @@ while [ $i -le $lines ]; do
   Gcount=$(grep -o 'G' <<<$line | wc -l)
   Ccount=$(grep -o 'C' <<<$line | wc -l)
   # print the two positive counts to $basepairfile
-  basepairs=""
+  basepairs="$i"
   if [ $Acount -gt 0 ]; then basepairs="${basepairs} A"; fi
   if [ $Tcount -gt 0 ]; then basepairs="${basepairs} T"; fi
   if [ $Gcount -gt 0 ]; then basepairs="${basepairs} G"; fi
@@ -88,12 +94,25 @@ for pops in $popsizes; do
   # lines=$(wc -l < $tempfile2)
   i=1
   while [ $i -le $lines ]; do
-    # get line
-    line=$(sed -n ${i}p $tempfile2)
     # get base pairs for line
     bases=$(sed -n ${i}p $basepairfile)
-    base1=$(echo $bases | cut -d' ' -f1)
-    base2=$(echo $bases | cut -d' ' -f2)
+    base1=base2=""
+    base1=$(echo $bases | cut -d' ' -f2)
+    base2=$(echo $bases | cut -d' ' -f3)
+
+    # if only 1 base pair
+    # echo "line= $i b1= $base1 b2= $base2"
+    if [ -z $base2 ]; then # checks if empty
+      # echo "skipping line $i"
+      let i+=1
+      continue
+    fi
+
+    # get line
+    line=$(sed -n ${i}p $tempfile2)
+
+    counts=0
+    counts2=0
 
     # base 1 - get count
     if [ $base1 == "A" ]; then 
