@@ -37,16 +37,24 @@
 #####################################################
 
 # input / output file names/data
-tpedfile=Y.tped
-treemixfile=file.treemix
+tpedfile=Y2.tped
 # number of individuals in each population
 popsizes="10 6 20"
 
 
 # don't need to be changed:
-filteredtpedfile="${tpedfile}.filtered.tped" # output a filtered tped file
-basepairfile=${tpedfile}.basepairs
+tpedfileNoExt=$(sed s/.tped//g <<<$tpedfile )
+treemixfile="${tpedfileNoExt}.treemix"
+filteredtpedfile="${tpedfileNoExt}.filtered.tped" # output a filtered tped file
+basepairfile="${tpedfileNoExt}.basepairs"
+filteredtpedheterofile="${tpedfileNoExt}.filtered.heterozygous.tped" # output a filtered tped file
+basepairheterofile="${tpedfileNoExt}.basepairs.heterozygous"
 
+
+
+# to clean up all output files without running script
+# rm -f $treemixfile $filteredtpedfile $basepairfile $filteredtpedheterofile $basepairheterofile
+# exit 0
 #####################################################
 #####################################################
 
@@ -122,9 +130,11 @@ while [ $i -le $lines ]; do
     #####################################################
     #####################################################
 
-    # check for step 1.1.2, but should not be commented out
+    # a check for step 1.1.2, but should not be commented out
     if [ $heterozygous = false ]; then
       echo $basepairs >> $basepairfile
+    else
+      echo $basepairs >> $basepairheterofile
     fi
   fi
   let i+=1
@@ -141,6 +151,15 @@ lines=$(wc -l < $basepairfile)
 while [ $i -le $lines ]; do
   tpedLineNum=$(sed -n ${i}p $basepairfile | cut -d' ' -f1)
   sed -n ${tpedLineNum}p $tpedfile >> $filteredtpedfile
+  let i+=1
+done
+
+> $filteredtpedheterofile
+i=1
+lines=$(wc -l < $basepairheterofile)
+while [ $i -le $lines ]; do
+  tpedLineNum=$(sed -n ${i}p $basepairheterofile | cut -d' ' -f1)
+  sed -n ${tpedLineNum}p $tpedfile >> $filteredtpedheterofile
   let i+=1
 done
 
@@ -225,6 +244,14 @@ echo step 1.5
 # rm -f $basepairfile
 rm -f $tempfile1 $tempfile2 ${poptempfiles}*
 rm -f *.filtered.tped.filtered.tped
+
+echo "INPUT file: $tpedfile"
+echo "OUTPUT files:"
+echo $treemixfile
+echo $filteredtpedfile
+echo $basepairfile
+echo $filteredtpedheterofile
+echo $basepairheterofile
 
 #####################################################
 
