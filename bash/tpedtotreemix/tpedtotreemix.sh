@@ -2,6 +2,7 @@
 
 # This script converts a .tped file to a .treemix file.
 # NOT included: the prepending of the population names to the .treemix file
+# step 1.1.2 MUST be commented out if not haploid data
 
 #####################################################
 # NOTES:
@@ -83,26 +84,43 @@ while [ $i -le $lines ]; do
   if [ $Ccount -gt 0 ]; then basepairs="${basepairs} C"; fi
   
   base1=base2=""
-  base1=$(echo $basepairs | cut -d' ' -f2)
-  base2=$(echo $basepairs | cut -d' ' -f3)
+  base1=$(cut -d' ' -f2 <<<$basepairs )
+  base2=$(cut -d' ' -f3 <<<$basepairs )
 
   # if only 1 base pair
   # echo "line= $i, b1= $base1, b2= $base2"
   if [ ! -z $base2 ]; then # checks if not empty
+    heterozygous=false # for step 1.1.2, but should not be commented out
 
+    #####################################################
     #####################################################
     # step 1.1.2: for haploids
+    # MUST BE COMMENTED OUT IF NOT HAPLOID DATA
     # remove lines that contain heterozygote pairs within an individual
+    
+    # check first two chars at a time
+    # shift to next pair
+    while [ ! -z "$line" ]; do
+      # get first two chars
+      templine=$(cut -f1 <<<$line )
+      b1=$(cut -d' ' -f1 <<<$templine )
+      b2=$(cut -d' ' -f2 <<<$templine )
 
-    while [ ! -z $line ]; do
-      # check first two chars at a time
-      # shift to next pair
+      if grep -q $b1 <<<"ATGC" && [ $b1 != $b2 ]; then
+        # must be ATCG char && b1 == b2
+        heterozygous=true
+        break
+      fi
+
+      line=$(echo "$line" | cut -s -f2- ) # get remainder of line
     done
     #####################################################
+    #####################################################
 
-    echo $basepairs >> $basepairfile
-  # else
-    # echo skipping line $i
+    # check for step 1.1.2, but should not be commented out
+    if [ $heterozygous = false ]; then
+      echo $basepairs >> $basepairfile
+    fi
   fi
   let i+=1
 done
@@ -125,10 +143,10 @@ for pops in $popsizes; do
     bases=$(sed -n ${i}p $basepairfile)
     # base1=base2=""
     tpedLineNum=$(echo $bases | cut -d' ' -f1)
-    base1=$(echo $bases | cut -d' ' -f2)
-    base2=$(echo $bases | cut -d' ' -f3)
+    base1=$(cut -d' ' -f2 <<<$bases )
+    base2=$(cut -d' ' -f3 <<<$bases )
 
-    echo "line= $tpedLineNum, basepair= $i, b1= $base1, b2= $base2"
+    # echo "line= $tpedLineNum, basepair= $i, b1= $base1, b2= $base2"
 
     # get line
     line=$(sed -n ${tpedLineNum}p $tempfile2)
