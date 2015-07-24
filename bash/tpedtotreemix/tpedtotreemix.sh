@@ -42,11 +42,15 @@ treemixfile=file.treemix
 # number of individuals in each population
 popsizes="10 6 20"
 
+
+# don't need to be changed:
+filteredtpedfile="${tpedfile}.filtered.tped" # output a filtered tped file
+basepairfile=${tpedfile}.basepairs
+
 #####################################################
 #####################################################
 
 # temp file names
-basepairfile=temp__basepair360.txt
 tempfile1=temp__file361.txt
 tempfile2=temp__file362.txt
 poptempfiles=temp__popfile360.
@@ -63,6 +67,7 @@ cut -f2- $tpedfile > $tempfile1
 #####################################################
 
 # step 1.1: get the two base pairs for each line
+echo step 1.1
 
 > $basepairfile
 # basepairfile contains the two base pairs for each corresponding line
@@ -127,7 +132,24 @@ done
 
 #####################################################
 
-# step 1.2: get the counts of the base pairs into files for each pop
+# step 1.2: create a .filtered.tped file that only has the included lines
+echo step 1.2
+
+> $filteredtpedfile
+i=1
+lines=$(wc -l < $basepairfile)
+while [ $i -le $lines ]; do
+  tpedLineNum=$(sed -n ${i}p $basepairfile | cut -d' ' -f1)
+  sed -n ${tpedLineNum}p $tpedfile >> $filteredtpedfile
+  let i+=1
+done
+
+#####################################################
+
+# step 1.3: get the counts of the base pairs into files for each pop
+echo step 1.3
+
+cut -f2- $filteredtpedfile > $tempfile1
 
 popNum=101 # count for temp files
 for pops in $popsizes; do
@@ -142,14 +164,13 @@ for pops in $popsizes; do
     # get base pairs for line
     bases=$(sed -n ${i}p $basepairfile)
     # base1=base2=""
-    tpedLineNum=$(echo $bases | cut -d' ' -f1)
     base1=$(cut -d' ' -f2 <<<$bases )
     base2=$(cut -d' ' -f3 <<<$bases )
 
     # echo "line= $tpedLineNum, basepair= $i, b1= $base1, b2= $base2"
 
     # get line
-    line=$(sed -n ${tpedLineNum}p $tempfile2)
+    line=$(sed -n ${i}p $tempfile2)
     counts=counts2=0
 
     # base 1 - get count
@@ -188,7 +209,8 @@ done
 
 #####################################################
 
-# step 1.3: paste pop files together
+echo step 1.4
+# step 1.4: paste pop files together
 # space delimited
 
 # globbing will only work with <900 populations
@@ -196,14 +218,14 @@ paste -d ' ' ${poptempfiles}* > $treemixfile
 
 #####################################################
 
-# step 1.4: cleanup
+echo step 1.5
+# step 1.5: cleanup
 
 # if worried there may be more than 2 different base pairs in any line, comment the following line to keep the file.
 # rm -f $basepairfile
 rm -f $tempfile1 $tempfile2 ${poptempfiles}*
+rm -f *.filtered.tped.filtered.tped
 
 #####################################################
-
-# method 2: do 1 line at a time
 
 date +"%m/%d %H:%M:%S $scriptname finished"
