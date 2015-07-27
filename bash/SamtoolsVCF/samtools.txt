@@ -1,0 +1,9 @@
+ 1073  samtools faidx FullDogY.fasta 
+ 1074  samtools index *bam
+ 1076  samtools index AfrWildDog.nodup.bam
+ 1077  samtools index Dhole.nodup.bam
+ 1086  samtools index Dhole.nodup.bam 
+ 1088  samtools mpileup -uf FullDogY.fasta Dhole.nodup.bam > Dhole.vcf
+ 1089  samtools mpileup -uf FullDogY.fasta AfrWildDog.nodup.bam > AfrWildDog.vcf
+ 1091  history | grep samtools
+ 1092  samtools mpileup -uf FullDogY.fasta AfrWildDog.nodup.bam Dhole.nodup.bam > Both.vcf
