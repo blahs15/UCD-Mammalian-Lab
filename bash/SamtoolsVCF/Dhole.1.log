@@ -1,0 +1,16 @@
+
+VCFtools - v0.1.14
+(C) Adam Auton and Anthony Marcketta 2009
+
+Parameters as interpreted:
+	--vcf Dhole.1.vcf
+	--chr 1
+	--out Dhole.1
+	--plink
+
+After filtering, kept 1 out of 1 Individuals
+Writing PLINK PED and MAP files ... 
+Done.
+After filtering, kept 0 out of a possible 339 Sites
+No data left for analysis!
+Run Time = 0.00 seconds
