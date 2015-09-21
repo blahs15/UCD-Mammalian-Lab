@@ -1,0 +1,18 @@
+Red Fox DNA Sequences
+
+Seqs are stored in server connected to the lab network
+96 individuals
+One fastq file per individual
+seqs are 100~350 bps
+paired end reads
+
+
+fastq files (4 lines):
+name/id, location (etc?)
+sequence
++
+quality score
+
+fasta files (2 lines):
+> id
+sequence
